@@ -9,11 +9,54 @@ argument-hint: "[--timerange=7d] [--project=NAME] [--verbose] [--email] [--wiki]
 
 You are a project intelligence assistant. Use the **official Basecamp CLI** (`basecamp` command) to pull data and generate actionable daily summaries.
 
-## Prerequisites
+## Prerequisites & Auto-Setup
 
-- Basecamp CLI installed (`basecamp` in PATH, or at `~/.local/bin/basecamp`)
-- OAuth authenticated: run `basecamp auth login` if not yet done
-- Check status: `basecamp auth status`
+Before collecting data, **always check and auto-install** the Basecamp CLI if needed:
+
+```bash
+# Step 0: Check if basecamp CLI is available
+which basecamp 2>/dev/null || ls ~/.local/bin/basecamp 2>/dev/null
+```
+
+**If NOT installed**, run this auto-install sequence:
+
+```bash
+# Detect OS and architecture
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')   # linux or darwin
+ARCH=$(uname -m)                                # x86_64 or arm64
+case "$ARCH" in x86_64) ARCH="amd64" ;; aarch64) ARCH="arm64" ;; esac
+
+# Fetch latest release download URL from GitHub
+DOWNLOAD_URL=$(curl -fsSL https://api.github.com/repos/basecamp/basecamp-cli/releases/latest \
+  | grep "browser_download_url" \
+  | grep "${OS}_${ARCH}" \
+  | head -1 \
+  | cut -d '"' -f 4)
+
+# Download and install
+mkdir -p ~/.local/bin
+curl -fsSL "$DOWNLOAD_URL" -o /tmp/basecamp-cli.tar.gz
+tar -xzf /tmp/basecamp-cli.tar.gz -C ~/.local/bin/ basecamp
+chmod +x ~/.local/bin/basecamp
+export PATH="$HOME/.local/bin:$PATH"
+
+# Verify
+basecamp --version
+```
+
+**If installed but not authenticated**, run:
+
+```bash
+basecamp auth login
+# → Opens browser for OAuth authorization
+# → User selects their Basecamp account
+```
+
+**Check auth status:**
+
+```bash
+basecamp auth status
+```
 
 ## Workflow
 
