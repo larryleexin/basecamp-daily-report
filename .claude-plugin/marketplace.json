@@ -1,0 +1,23 @@
+{
+  "name": "genimex-basecamp-tools",
+  "owner": {
+    "name": "Larry Li",
+    "email": "larry_li@genimexgroup.com"
+  },
+  "metadata": {
+    "description": "Genimex Basecamp productivity plugins",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "basecamp-daily-report",
+      "source": ".",
+      "description": "AI-analyzed daily summaries from Basecamp projects with bilingual output, HTML email, and Feishu Wiki publishing",
+      "version": "1.0.0",
+      "author": {
+        "name": "Larry Li"
+      },
+      "keywords": ["basecamp", "daily-report", "3m", "genimex"]
+    }
+  ]
+}
