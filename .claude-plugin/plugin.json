@@ -1,12 +1,12 @@
 {
   "name": "basecamp-daily-report",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Basecamp Daily Report Generator — Pull project data via Basecamp CLI, generate AI-analyzed bilingual summaries, publish to Feishu Wiki, and send HTML email reports.",
   "author": {
     "name": "Larry Li",
     "email": "larry_li@genimexgroup.com"
   },
-  "repository": "https://github.com/genimex/basecamp-daily-report",
+  "repository": "https://github.com/larryleexin/basecamp-daily-report",
   "license": "MIT",
   "keywords": [
     "basecamp",
@@ -18,19 +18,27 @@
   "skills": "./skills/",
   "userConfig": {
     "basecamp_account_id": {
+      "title": "Basecamp Account ID",
       "description": "Your Basecamp account ID (e.g. 3609478 for Genimex)",
+      "type": "string",
       "sensitive": false
     },
     "email_recipients": {
+      "title": "Email Recipients",
       "description": "Comma-separated email addresses for report delivery (e.g. larry_li@genimexgroup.com,team@genimexgroup.com)",
+      "type": "string",
       "sensitive": false
     },
     "feishu_wiki_node": {
+      "title": "Feishu Wiki Node",
       "description": "Feishu Wiki parent node token for report storage (optional)",
+      "type": "string",
       "sensitive": false
     },
     "report_language": {
+      "title": "Report Language",
       "description": "Report language mode: 'bilingual' (EN primary + CN secondary), 'en', or 'cn'. Default: bilingual",
+      "type": "string",
       "sensitive": false
     }
   }
