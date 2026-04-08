@@ -1,6 +1,6 @@
 {
   "name": "basecamp-daily-report",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Basecamp Daily Report Generator — Pull project data via Basecamp CLI, generate AI-analyzed bilingual summaries, publish to Feishu Wiki, and send HTML email reports.",
   "author": {
     "name": "Larry Li",
