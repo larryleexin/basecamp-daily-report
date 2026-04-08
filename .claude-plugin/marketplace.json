@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "basecamp-daily-report",
-      "source": ".",
+      "source": "./",
       "description": "AI-analyzed daily summaries from Basecamp projects with bilingual output, HTML email, and Feishu Wiki publishing",
       "version": "1.0.0",
       "author": {
