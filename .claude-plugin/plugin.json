@@ -40,6 +40,12 @@
       "description": "Report language mode: 'bilingual' (EN primary + CN secondary), 'en', or 'cn'. Default: bilingual",
       "type": "string",
       "sensitive": false
+    },
+    "basecamp_api_token": {
+      "title": "Basecamp API Token",
+      "description": "OAuth access token for Basecamp API (required for Cowork sandbox mode). Get it by running: security find-generic-password -s basecamp -w | base64 -d | python3 -c \"import sys,json;print(json.loads(sys.stdin.read())['access_token'])\"",
+      "type": "string",
+      "sensitive": true
     }
   }
 }

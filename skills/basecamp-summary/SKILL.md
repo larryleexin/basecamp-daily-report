@@ -11,52 +11,103 @@ You are a project intelligence assistant. Use the **official Basecamp CLI** (`ba
 
 ## Prerequisites & Auto-Setup
 
-Before collecting data, **always check and auto-install** the Basecamp CLI if needed:
+This skill supports **two operating modes** — auto-detected at runtime:
+
+### Mode Detection (always run first)
 
 ```bash
-# Step 0: Check if basecamp CLI is available
 which basecamp 2>/dev/null || ls ~/.local/bin/basecamp 2>/dev/null
 ```
 
-**If NOT installed**, run this auto-install sequence:
+- **CLI found** → Use **CLI Mode** (full features, recommended)
+- **CLI not found** → Use **API Mode** (curl + token, for Cowork sandbox)
+
+---
+
+### CLI Mode (Claude Code / local machine)
+
+If Basecamp CLI is available:
 
 ```bash
-# Detect OS and architecture
-OS=$(uname -s | tr '[:upper:]' '[:lower:]')   # linux or darwin
-ARCH=$(uname -m)                                # x86_64 or arm64
+basecamp auth status   # Check if authenticated
+basecamp auth login    # If not, opens browser for OAuth
+```
+
+If CLI is not installed, try auto-install from GitHub Releases:
+
+```bash
+OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
 case "$ARCH" in x86_64) ARCH="amd64" ;; aarch64) ARCH="arm64" ;; esac
 
-# Fetch latest release download URL from GitHub
 DOWNLOAD_URL=$(curl -fsSL https://api.github.com/repos/basecamp/basecamp-cli/releases/latest \
   | grep "browser_download_url" \
   | grep "${OS}_${ARCH}" \
   | head -1 \
   | cut -d '"' -f 4)
 
-# Download and install
 mkdir -p ~/.local/bin
 curl -fsSL "$DOWNLOAD_URL" -o /tmp/basecamp-cli.tar.gz
 tar -xzf /tmp/basecamp-cli.tar.gz -C ~/.local/bin/ basecamp
 chmod +x ~/.local/bin/basecamp
 export PATH="$HOME/.local/bin:$PATH"
-
-# Verify
 basecamp --version
 ```
 
-**If installed but not authenticated**, run:
+---
+
+### API Mode (Cowork sandbox / no CLI available)
+
+When running in a sandboxed environment (Cowork VM), the CLI cannot be installed. Use direct Basecamp REST API calls with a pre-configured token.
+
+**The user must provide their Basecamp API token** via plugin config `basecamp_api_token`. If not configured, instruct them to run this on their local machine:
 
 ```bash
-basecamp auth login
-# → Opens browser for OAuth authorization
-# → User selects their Basecamp account
+security find-generic-password -s basecamp -w \
+  | cut -d: -f2 \
+  | base64 -d \
+  | python3 -c "import sys,json; d=json.loads(sys.stdin.read()); print(d['access_token'])"
 ```
 
-**Check auth status:**
+Then paste the token into the plugin's `Basecamp API Token` config field.
+
+**API Mode data collection** — replace all CLI commands with curl:
 
 ```bash
-basecamp auth status
+# Base URL
+BASE="https://3.basecampapi.com/ACCOUNT_ID"
+TOKEN="<from plugin config basecamp_api_token>"
+AUTH="Authorization: Bearer $TOKEN"
+UA="User-Agent: BasecampDailyReport (larry_li@genimexgroup.com)"
+
+# List projects
+curl -fsSL -H "$AUTH" -H "$UA" "$BASE/projects.json"
+
+# Project messages (paginated)
+curl -fsSL -H "$AUTH" -H "$UA" "$BASE/buckets/PROJECT_ID/message_boards/BOARD_ID/messages.json"
+
+# Project todosets
+curl -fsSL -H "$AUTH" -H "$UA" "$BASE/buckets/PROJECT_ID/todosets/TODOSET_ID.json"
+
+# Project todolists
+curl -fsSL -H "$AUTH" -H "$UA" "$BASE/buckets/PROJECT_ID/todosets/TODOSET_ID/todolists.json"
+
+# Todos in a list
+curl -fsSL -H "$AUTH" -H "$UA" "$BASE/buckets/PROJECT_ID/todolists/LIST_ID/todos.json"
+
+# Project recordings (recent activity)
+curl -fsSL -H "$AUTH" -H "$UA" "$BASE/projects/PROJECT_ID/recordings.json?type=Message&sort=created_at&direction=desc"
+
+# Campfire / chat lines
+curl -fsSL -H "$AUTH" -H "$UA" "$BASE/buckets/PROJECT_ID/chats/CHAT_ID/lines.json"
 ```
+
+**Important API notes:**
+- Account ID: from plugin config `basecamp_account_id` (default: 3609478 for Genimex)
+- API docs: https://github.com/basecamp/bc3-api
+- To find board/todoset IDs: first GET the project JSON, look for `dock` array entries with `name: "message_board"` or `name: "todoset"`
+- Pagination: check `Link` header for `rel="next"`
+- Rate limit: 50 req / 10 seconds
 
 ## Workflow
 
